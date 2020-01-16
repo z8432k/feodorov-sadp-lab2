@@ -47,7 +47,7 @@ static BListItem blist_item_new(void *data) {
   return item;
 }
 
-void blist_add_tail(BList list, void *data) {
+BListItem blist_add_tail(BList list, void *data) {
   BListItem item = blist_item_new(data);
 
   item->list = list;
@@ -63,9 +63,11 @@ void blist_add_tail(BList list, void *data) {
     list->first = item;
     list->first->next = item;
   }
+
+  return item;
 }
 
-void blist_add_head(BList list, void *data) {
+BListItem blist_add_head(BList list, void *data) {
   BListItem item = blist_item_new(data);
 
   item->list = list;
@@ -81,6 +83,66 @@ void blist_add_head(BList list, void *data) {
     list->last = item;
     list->last->prev = item;
   }
+
+  return item;
+}
+
+BListItem blist_add_after(BListItem item, void *data) {
+  BListItem newItem = blist_item_new(data);
+
+  if (item->next) {
+    newItem->next = item->next;
+    item->next->prev = newItem;
+  }
+
+  if (item->list->last == item) {
+    item->list->last = newItem;
+  }
+
+  item->next = newItem;
+  newItem->prev = item;
+
+  return newItem;
+}
+
+BListItem blist_remove(BListItem item) {
+  if (item->prev) {
+    if (item->next) {
+      item->prev->next = item->next;
+    }
+    else {
+      item->prev->next = NULL;
+    }
+  }
+
+  if (item->next) {
+    if (item->prev) {
+      item->next->prev = item->prev;
+    }
+    else {
+      item->next->prev = NULL;
+    }
+  }
+
+  if (item->list->last == item) {
+    if (item->prev) {
+      item->list->last = item->prev;
+    }
+    else {
+      item->list->last = NULL;
+    }
+  }
+
+  if (item->list->first == item) {
+    if (item->next) {
+      item->list->first = item->next;
+    }
+    else {
+      item->list->first = NULL;
+    }
+  }
+
+  return item;
 }
 
 void blist_each(BList list, EachCb cb, void *data) {
@@ -97,7 +159,7 @@ inline static void blist_free_item(BListItem item, void *arg) {
   if (item->list->freeCb) {
     item->list->freeCb(item->data, (void *) NULL);
   }
-  printf("Free memory for list item at %p\n", (void *) item);
+  printf("\t==> Free memory for list item at %p\n", (void *) item);
   free(item);
 }
 
@@ -114,7 +176,7 @@ String allocStr(String src) {
 }
 
 void freeStr(void * str, void *data) {
-  printf("Free memory for string at %p\n", (void *) str);
+  printf("\t==> Free memory for string at %p\n", (void *) str);
   free(str);
 }
 
@@ -131,11 +193,23 @@ int main(void) {
   String str2 = allocStr("str 2");
   String str3 = allocStr("str 3");
 
-  blist_add_head(blist, str1);
-  blist_add_tail(blist, str2);
-  blist_add_head(blist, str3);
+  BListItem i1 = blist_add_head(blist, str1);
+  BListItem i2 = blist_add_tail(blist, str2);
+  BListItem i3 = blist_add_head(blist, str3);
 
   blist_each(blist, (EachCb) printStr, NULL);
+
+  blist_remove(i3);
+  blist_free_item(i3, NULL);
+  blist_each(blist, (EachCb) printStr, NULL);
+
+  blist_remove(i2);
+  blist_free_item(i2, NULL);
+  blist_each(blist, (EachCb)printStr, NULL);
+
+  blist_remove(i1);
+  blist_free_item(i1, NULL);
+  blist_each(blist, (EachCb)printStr, NULL);
 
   blist_free(blist);
 
