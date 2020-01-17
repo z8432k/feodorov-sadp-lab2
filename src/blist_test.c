@@ -39,15 +39,9 @@ BList initNumbersList(size_t nItems) {
   return list;
 }
 
-int main(void) {
-  printf("== Bidirectional linear list implementation. ==\n\n");
-
-  BList orig = initNumbersList(NUMBERS_MAX);
-  BList dst = blist_new(NULL);
-
-
-  BListItem currentForward = orig->first;
-  BListItem currentBack = orig->last;
+static void fillList(BList src, BList dst) {
+  BListItem currentForward = src->first;
+  BListItem currentBack = src->last;
   size_t forwardCounter = 0;
   size_t backCounter = NUMBERS_MAX;
 
@@ -67,6 +61,15 @@ int main(void) {
 
     forwardCounter++;
   }
+}
+
+int main(void) {
+  printf("== Bidirectional linear list implementation. ==\n\n");
+
+  BList orig = initNumbersList(NUMBERS_MAX);
+  BList dst = blist_new(NULL);
+
+  fillList(orig, dst);
 
   blist_each(dst, (EachCb) printNumber, false, NULL);
 
