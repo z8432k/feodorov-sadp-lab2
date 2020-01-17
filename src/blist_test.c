@@ -46,30 +46,26 @@ int main(void) {
   BList dst = blist_new(NULL);
 
 
-  BListItem current = orig->first;
-  size_t i = 0;
+  BListItem currentForward = orig->first;
+  BListItem currentBack = orig->last;
+  size_t forwardCounter = 0;
+  size_t backCounter = NUMBERS_MAX;
 
-  while (current) {
-    if (!(i % 2)) {
-      blist_add_tail(dst, current->data);
+  while (currentForward || currentBack) {
+    backCounter--;
+
+    if (currentForward  && !(forwardCounter % 2)) {
+      blist_add_tail(dst, currentForward->data);
     }
 
-    current = current->next;
-    i++;
-  }
-
-  current = orig->last;
-  i = NUMBERS_MAX;
-  BListItem dstCurrent = dst->first;
-
-  while (current) {
-    i--;
-    if (i % 2) {
-      blist_add_after(dstCurrent, current->data);
+    if (currentBack && backCounter % 2) {
+      blist_add_after(dst->last, currentBack->data);
     }
 
-    current = current->prev;
-    dstCurrent = dstCurrent->next;
+    currentForward = currentForward->next;
+    currentBack = currentBack->prev;
+
+    forwardCounter++;
   }
 
   blist_each(dst, (EachCb) printNumber, false, NULL);

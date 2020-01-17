@@ -65,6 +65,8 @@ BListItem blist_add_head(BList list, void *data) {
 BListItem blist_add_after(BListItem item, void *data) {
   BListItem newItem = blist_item_new(data);
 
+  newItem->list = item->list;
+
   if (item->next) {
     newItem->next = item->next;
     item->next->prev = newItem;
