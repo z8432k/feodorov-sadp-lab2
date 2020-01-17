@@ -4,8 +4,9 @@
 #include <string.h>
 #include "include/blist.h"
 
-typedef char *String;
+#define NUMBERS_MAX 50
 
+typedef char *String;
 
 static String allocStr(String src) {
   size_t strSize = strlen(src);
@@ -24,34 +25,57 @@ static void printStr(BListItem item, void *data) {
   printf("%s\n", (String) item->data);
 }
 
+static void printNumber(BListItem item, void *data) {
+  printf("%zu\n", (size_t) item->data);
+}
+
+BList initNumbersList(size_t nItems) {
+  BList list = blist_new(NULL);
+
+  for (size_t i = 0; i < nItems; i++) {
+    blist_add_tail(list, (void *) i);
+  }
+
+  return list;
+}
+
 int main(void) {
   printf("== Bidirectional linear list implementation. ==\n\n");
 
-  BList blist = blist_new(freeStr);
+  BList orig = initNumbersList(NUMBERS_MAX);
+  BList dst = blist_new(NULL);
 
-  String str1 = allocStr("str 1");
-  String str2 = allocStr("str 2");
-  String str3 = allocStr("str 3");
 
-  BListItem i1 = blist_add_head(blist, str1);
-  BListItem i2 = blist_add_tail(blist, str2);
-  BListItem i3 = blist_add_head(blist, str3);
+  BListItem current = orig->first;
+  size_t i = 0;
 
-  blist_each(blist, (EachCb) printStr, NULL);
+  while (current) {
+    if (!(i % 2)) {
+      blist_add_tail(dst, current->data);
+    }
 
-  blist_remove(i3);
-  blist_free_item(i3, NULL);
-  blist_each(blist, (EachCb) printStr, NULL);
+    current = current->next;
+    i++;
+  }
 
-  blist_remove(i2);
-  blist_free_item(i2, NULL);
-  blist_each(blist, (EachCb) printStr, NULL);
+  current = orig->last;
+  i = NUMBERS_MAX;
+  BListItem dstCurrent = dst->first;
 
-  blist_remove(i1);
-  blist_free_item(i1, NULL);
-  blist_each(blist, (EachCb) printStr, NULL);
+  while (current) {
+    i--;
+    if (i % 2) {
+      blist_add_after(dstCurrent, current->data);
+    }
 
-  blist_free(blist);
+    current = current->prev;
+    dstCurrent = dstCurrent->next;
+  }
+
+  blist_each(dst, (EachCb) printNumber, false, NULL);
+
+  blist_free(orig);
+  blist_free(dst);
 
   exit(EXIT_SUCCESS);
 }

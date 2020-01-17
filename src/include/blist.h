@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct _BList BList_t;
 typedef struct _BListItem BListItem_t;
@@ -34,7 +35,7 @@ BListItem blist_add_after(BListItem item, void *data);
 
 BListItem blist_remove(BListItem item);
 
-void blist_each(BList list, EachCb cb, void *data);
+void blist_each(BList list, EachCb cb, bool reverse, void *data);
 
 inline static void blist_free_item(BListItem item, void *arg) {
   if (item->list->freeCb) {

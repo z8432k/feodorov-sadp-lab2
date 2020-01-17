@@ -120,18 +120,25 @@ BListItem blist_remove(BListItem item) {
   return item;
 }
 
-void blist_each(BList list, EachCb cb, void *data) {
+void blist_each(BList list, EachCb cb, bool reverse, void *data) {
   BListItem current = list->first;
 
   while (current) {
     BListItem target = current;
-    current = current->next;
+
+    if (reverse) {
+      current = current->prev;
+    }
+    else {
+      current = current->next;
+    }
+
     cb(target, data);
   }
 }
 
 void blist_free(BList list) {
-  blist_each(list, (EachCb) blist_free_item, NULL);
+  blist_each(list, (EachCb) blist_free_item, false, NULL);
   printf("\t==> Free memory for list at %p\n", (void *) list);
   free(list);
 }
